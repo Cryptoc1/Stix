@@ -1,4 +1,4 @@
-# OSam
+# Stix
 
 I *very* minimal operating system, kind of.
 
