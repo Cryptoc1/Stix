@@ -14,12 +14,18 @@ nasm -f bin -o core/kernel.bin core/kernel.asm || error;
 echo "[+] Kernel compiled with result core/kernel.bin"
 
 echo "Compiling shell...";
-nasm -f bin -o core/sh.bin core/sh.asm || error;
+#nasm -f bin -o core/sh.bin core/sh.asm || error;
 echo "[+] Shell compiled with result core/sh.bin"
 
 arg=("$@");
 
 if [ "${arg[0]}" = "images" ]; then
+	if [ -f images/Stix.dmg ] || [ -f images/Stix.flp ]; then
+		echo "Deleting existing images...";
+		rm images/Stix.* || error;
+		echo "[-] Deleted files";
+	fi
+
 	echo "Creating Stix image...";
 	hdiutil create images/Stix.dmg -megabytes 1.44 -type UDIF || error;
 	echo "[+] Image created with result images/Stix.dmg";
@@ -34,7 +40,7 @@ if [ "${arg[0]}" = "images" ]; then
 
 	echo "Attempting mount of new disk...";
 	disk=`hdid -nobrowse -nomount images/Stix.dmg`;
-	mount ${disk} mnt || error;
+	mount -t msdos ${disk} mnt || error;
 	echo "[+] Disk mounted with result images/Stix.dmg -> ./mnt";
 
 	echo "Writing kernel to image...";
@@ -50,7 +56,7 @@ if [ "${arg[0]}" = "images" ]; then
 	echo "[+] New image created with result images/Stix.dmg -> images/Stix.flp";
 
 	echo "Cleaing up...";
-	rm -t mnt || error;
+	rm -r mnt || error;
 	echo "[-] Build cleaned up";
 	
 	echo "Build complete, run \`qemu -fda images/Stix.flp\` to boot";
